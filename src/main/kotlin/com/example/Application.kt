@@ -2,6 +2,7 @@ package com.example
 
 import com.example.repository.Users
 import io.ktor.server.application.*
+import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.serialization.Serializable
@@ -10,8 +11,6 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun main() {
-    initDatabase()
-
     embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
 }
 
@@ -24,11 +23,17 @@ data class UserResponse(val id: Int, val name: String, val age: Int)
 @Serializable
 data class LoginRequest(val username: String, val password: String)
 
-fun initDatabase() {
+fun initDatabase(config: ApplicationConfig) {
+    val url = config.property("storage.jdbcURL").getString()
+    val user = config.property("storage.user").getString()
+    val password = config.property("storage.password").getString()
+    val driver = config.property("storage.driverClassName").getString()
+
     val db = Database.connect(
-        url = "jdbc:postgresql://localhost:5432/ktor_db",
-        driver = "org.postgresql.Driver",
-        user = "postgres",
+        url = url,
+        driver = driver,
+        user = user,
+        password = password
     )
 
     transaction(db) {
@@ -38,6 +43,8 @@ fun initDatabase() {
 }
 
 fun Application.module() {
+    initDatabase(environment.config)
+
     configureFrameworks()
     configureStatusPage()
     configureSecurity()
