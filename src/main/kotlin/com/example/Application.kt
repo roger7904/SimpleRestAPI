@@ -23,17 +23,21 @@ data class UserResponse(val id: Int, val name: String, val age: Int)
 @Serializable
 data class LoginRequest(val username: String, val password: String)
 
-fun initDatabase(config: ApplicationConfig) {
-    val url = config.property("storage.jdbcURL").getString()
-    val user = config.property("storage.user").getString()
-    val password = config.property("storage.password").getString()
-    val driver = config.property("storage.driverClassName").getString()
+fun initDatabase() {
+    val dbHost = System.getenv("DB_HOST") ?: "localhost"
+    val dbName = System.getenv("DB_NAME") ?: "ktor_db"
+    val dbUser = System.getenv("DB_USER") ?: "postgres"
+    val dbPassword = System.getenv("DB_PASSWORD") ?: "postgres"
+    val dbPort = System.getenv("DB_PORT") ?: "5432"  // 視需求
+
+    val url = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
+    val driver = "org.postgresql.Driver"
 
     val db = Database.connect(
         url = url,
         driver = driver,
-        user = user,
-        password = password
+        user = dbUser,
+        password = dbPassword
     )
 
     transaction(db) {
@@ -43,7 +47,7 @@ fun initDatabase(config: ApplicationConfig) {
 }
 
 fun Application.module() {
-    initDatabase(environment.config)
+    initDatabase()
 
     configureFrameworks()
     configureStatusPage()
