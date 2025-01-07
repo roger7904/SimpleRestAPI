@@ -4,26 +4,36 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.models.UserAccount
 import com.example.repository.UserAccountRepository
+import org.springframework.security.crypto.bcrypt.BCrypt
 
 class AuthService(private val userAccountRepository: UserAccountRepository) {
 
-    // TODO password salt hash
+    /**
+     * 註冊使用者
+     * 對密碼做雜湊後再存入資料庫。
+     */
     fun register(username: String, password: String, role: String): UserAccount {
         val existingUser = userAccountRepository.getUserAccountByUsername(username)
         if (existingUser != null) {
             throw IllegalArgumentException("Username already exists.")
         }
 
-        val newUser = userAccountRepository.createUserAccount(username, password, role)
+        val hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt())
+
+        val newUser = userAccountRepository.createUserAccount(username, hashedPassword, role)
+
         return newUser
     }
 
-
-    fun login(username: String, password: String, secret: String): String? {
+    /**
+     * 登入流程
+     * 成功，回傳 JWT token；失敗，回傳 null。
+     */
+    fun login(username: String, plainPassword: String, secret: String): String? {
         val user = userAccountRepository.getUserAccountByUsername(username) ?: return null
 
-        // TODO 驗證鹽雜湊密碼
-        if (user.password != password) {
+        val matched = BCrypt.checkpw(plainPassword, user.password)
+        if (!matched) {
             return null
         }
 

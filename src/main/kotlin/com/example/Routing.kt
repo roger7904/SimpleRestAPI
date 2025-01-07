@@ -38,18 +38,5 @@ fun Application.configureRouting() {
             val users = userService.listUsers()
             call.respond(users)
         }
-
-        authenticate("auth-jwt") {
-            get("/role-check") {
-                val principal = call.principal<JWTPrincipal>()
-                val role = principal?.payload?.getClaim("role")?.asString()
-
-                when (role) {
-                    "admin" -> call.respond(mapOf("message" to "Hi, Admin! 這裡是只有管理員能看到的資訊。"))
-                    "user" -> call.respond(mapOf("message" to "Hello, User! 這裡是一般使用者能看到的內容。"))
-                    else -> call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
-                }
-            }
-        }
     }
 }
