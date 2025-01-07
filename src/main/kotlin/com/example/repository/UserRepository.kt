@@ -1,6 +1,7 @@
 package com.example.repository
 
 import com.example.models.User
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -31,6 +32,12 @@ class UserRepository {
         }
     }
 }
+
+@Serializable
+data class UserRequest(val name: String, val age: Int)
+
+@Serializable
+data class UserResponse(val id: Int, val name: String, val age: Int)
 
 object Users : Table() {
     val id = integer("id").autoIncrement()

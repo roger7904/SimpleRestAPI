@@ -1,11 +1,10 @@
 package com.example
 
+import com.example.repository.UserAccounts
 import com.example.repository.Users
 import io.ktor.server.application.*
-import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -13,15 +12,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun main() {
     embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
 }
-
-@Serializable
-data class UserRequest(val name: String, val age: Int)
-
-@Serializable
-data class UserResponse(val id: Int, val name: String, val age: Int)
-
-@Serializable
-data class LoginRequest(val username: String, val password: String)
 
 fun initDatabase() {
     val dbHost = System.getenv("DB_HOST") ?: "localhost"
@@ -43,6 +33,7 @@ fun initDatabase() {
     transaction(db) {
         // init table
         SchemaUtils.create(Users)
+        SchemaUtils.create(UserAccounts)
     }
 }
 
@@ -53,5 +44,6 @@ fun Application.module() {
     configureStatusPage()
     configureSecurity()
     configureSerialization()
+    configureAuthRouting()
     configureRouting()
 }

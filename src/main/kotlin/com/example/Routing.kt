@@ -1,11 +1,11 @@
 package com.example
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.example.repository.UserRepository
+import com.example.repository.UserRequest
 import com.example.service.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.requestvalidation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -28,7 +28,6 @@ fun Application.configureRouting() {
     }
 
     routing {
-
         post("/users") {
             val request = call.receive<UserRequest>()
             val user = userService.createUser(request.name, request.age)
@@ -40,30 +39,17 @@ fun Application.configureRouting() {
             call.respond(users)
         }
 
-        post("/login") {
-            val request = call.receive<LoginRequest>()
-            if (request.username == "admin" && request.password == "password") {
-                val token = JWT.create()
-                    .withAudience("ktorAudience")
-                    .withIssuer("ktor.io")
-                    .withClaim("username", request.username)
-                    .withClaim("role", "admin")
-                    .sign(Algorithm.HMAC256("Roger-TEST-secret"))
+        authenticate("auth-jwt") {
+            get("/role-check") {
+                val principal = call.principal<JWTPrincipal>()
+                val role = principal?.payload?.getClaim("role")?.asString()
 
-                call.respond(mapOf("token" to token))
-            } else if (request.username == "user" && request.password == "password") {
-                val token = JWT.create()
-                    .withAudience("ktorAudience")
-                    .withIssuer("ktor.io")
-                    .withClaim("username", request.username)
-                    .withClaim("role", "user")
-                    .sign(Algorithm.HMAC256("Roger-TEST-secret"))
-
-                call.respond(mapOf("token" to token))
-            } else {
-                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid credentials"))
+                when (role) {
+                    "admin" -> call.respond(mapOf("message" to "Hi, Admin! 這裡是只有管理員能看到的資訊。"))
+                    "user" -> call.respond(mapOf("message" to "Hello, User! 這裡是一般使用者能看到的內容。"))
+                    else -> call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
+                }
             }
         }
-
     }
 }

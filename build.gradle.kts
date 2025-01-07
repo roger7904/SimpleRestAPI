@@ -48,4 +48,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.postgresql:postgresql:42.6.0")
+
+    implementation("org.mindrot:jbcrypt:0.4")
 }
