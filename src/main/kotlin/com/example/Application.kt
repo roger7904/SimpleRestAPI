@@ -1,7 +1,7 @@
 package com.example
 
-import com.example.repository.UserAccounts
-import com.example.repository.Users
+import com.example.tables.UserAccounts
+import com.example.tables.Users
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -14,14 +14,14 @@ fun main() {
 }
 
 fun initDatabase() {
-    val dbHost = System.getenv("DB_HOST") ?: "localhost"
-    val dbName = System.getenv("DB_NAME") ?: "ktor_db"
-    val dbUser = System.getenv("DB_USER") ?: "postgres"
-    val dbPassword = System.getenv("DB_PASSWORD") ?: "postgres"
-    val dbPort = System.getenv("DB_PORT") ?: "5432"  // 視需求
+    val dbHost = System.getenv("MYSQL_DB_HOST")
+    val dbName = System.getenv("MYSQL_DB_NAME")
+    val dbUser = System.getenv("MYSQL_DB_USER")
+    val dbPassword = System.getenv("MYSQL_DB_PASSWORD")
+    val dbPort = System.getenv("MYSQL_DB_PORT")
 
-    val url = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
-    val driver = "org.postgresql.Driver"
+    val url = "jdbc:mysql://$dbHost:$dbPort/$dbName?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC"
+    val driver = "com.mysql.cj.jdbc.Driver"
 
     val db = Database.connect(
         url = url,

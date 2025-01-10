@@ -47,7 +47,12 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-crypt:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+
+    // PostgreSQL
     implementation("org.postgresql:postgresql:42.6.0")
+
+    // MySQL
+    implementation("mysql:mysql-connector-java:8.0.33")
 
     implementation("org.mindrot:jbcrypt:0.4")
 }

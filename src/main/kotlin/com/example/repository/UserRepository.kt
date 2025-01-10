@@ -1,6 +1,7 @@
 package com.example.repository
 
 import com.example.models.User
+import com.example.tables.Users
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -38,10 +39,3 @@ data class UserRequest(val name: String, val age: Int)
 
 @Serializable
 data class UserResponse(val id: Int, val name: String, val age: Int)
-
-object Users : Table() {
-    val id = integer("id").autoIncrement()
-    val name = varchar("name", 255)
-    val age = integer("age")
-    override val primaryKey = PrimaryKey(id)
-}

@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.repository.AllBooksRepository
 import com.example.repository.UserAccountRepository
 import com.example.repository.UserRepository
 import com.example.service.AuthService
@@ -15,6 +16,7 @@ fun Application.configureFrameworks() {
         single { UserService(get()) }
         single { UserAccountRepository() }
         single { AuthService(get()) }
+        single { AllBooksRepository() }
     }
 
     install(Koin) {

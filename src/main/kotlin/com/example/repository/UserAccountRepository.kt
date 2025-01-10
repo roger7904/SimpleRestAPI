@@ -1,6 +1,7 @@
 package com.example.repository
 
 import com.example.models.UserAccount
+import com.example.tables.UserAccounts
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
@@ -62,11 +63,3 @@ data class LoginResponse(val token: String)
 @Serializable
 data class RegisterResponse(val id: Int, val username: String, val role: String)
 
-object UserAccounts : Table() {
-    val id = integer("id").autoIncrement()
-    val username = varchar("username", 50).uniqueIndex()
-    val password = varchar("password", 255)
-    val role = varchar("role", 50)
-
-    override val primaryKey = PrimaryKey(id)
-}
