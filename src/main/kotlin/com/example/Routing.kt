@@ -1,8 +1,8 @@
 package com.example
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
-import com.example.repository.UserRepository
+import com.example.models.AllBookDTO
+import com.example.repository.AllBooksRepository
+import com.example.repository.UserRequest
 import com.example.service.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -14,6 +14,7 @@ import org.koin.ktor.ext.inject
 
 fun Application.configureRouting() {
     val userService by inject<UserService>()
+    val allBooksRepository by inject<AllBooksRepository>()
 
     install(RequestValidation) {
         validate<UserRequest> { user ->
@@ -28,7 +29,6 @@ fun Application.configureRouting() {
     }
 
     routing {
-
         post("/users") {
             val request = call.receive<UserRequest>()
             val user = userService.createUser(request.name, request.age)
@@ -40,30 +40,29 @@ fun Application.configureRouting() {
             call.respond(users)
         }
 
-        post("/login") {
-            val request = call.receive<LoginRequest>()
-            if (request.username == "admin" && request.password == "password") {
-                val token = JWT.create()
-                    .withAudience("ktorAudience")
-                    .withIssuer("ktor.io")
-                    .withClaim("username", request.username)
-                    .withClaim("role", "admin")
-                    .sign(Algorithm.HMAC256("Roger-TEST-secret"))
-
-                call.respond(mapOf("token" to token))
-            } else if (request.username == "user" && request.password == "password") {
-                val token = JWT.create()
-                    .withAudience("ktorAudience")
-                    .withIssuer("ktor.io")
-                    .withClaim("username", request.username)
-                    .withClaim("role", "user")
-                    .sign(Algorithm.HMAC256("Roger-TEST-secret"))
-
-                call.respond(mapOf("token" to token))
-            } else {
-                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid credentials"))
-            }
+        get("/allbooks") {
+            val books = allBooksRepository.getAllBooks()
+            call.respond(books)
         }
 
+        post("/allbooks") {
+            val request = call.receive<AllBookDTO>()
+            val newId = allBooksRepository.addBook(request)
+            call.respond(mapOf("message" to "Book added", "id" to newId))
+        }
+
+        get("/allbooks/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+                return@get
+            }
+            val book = allBooksRepository.findBookById(id)
+            if (book == null) {
+                call.respond(HttpStatusCode.NotFound, "Book not found")
+            } else {
+                call.respond(book)
+            }
+        }
     }
 }
