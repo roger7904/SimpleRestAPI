@@ -45,5 +45,6 @@ fun Application.module() {
     configureSecurity()
     configureSerialization()
     configureAuthRouting()
+    configureGoogleOAuth()
     configureRouting()
 }

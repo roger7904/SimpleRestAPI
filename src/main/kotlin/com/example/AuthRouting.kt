@@ -30,16 +30,16 @@ fun Application.configureAuthRouting() {
             }
         }
 
-        post("/login") {
-            val loginRequest = call.receive<LoginRequest>()
-            val secret = "Roger-TEST-secret"  // TODO move to .env
-            val token = authService.login(loginRequest.username, loginRequest.password, secret)
-            if (token == null) {
-                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid credentials"))
-            } else {
-                call.respond(LoginResponse(token))
-            }
-        }
+//        post("/login") {
+//            val loginRequest = call.receive<LoginRequest>()
+//            val secret = "Roger-TEST-secret"  // TODO move to .env
+//            val token = authService.login(loginRequest.username, loginRequest.password, secret)
+//            if (token == null) {
+//                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid credentials"))
+//            } else {
+//                call.respond(LoginResponse(token))
+//            }
+//        }
     }
 
     routing {
@@ -69,5 +69,46 @@ fun Application.configureAuthRouting() {
                 }
             }
         }
+
+//        authenticate("auth-oauth-google") {
+//            // (1) 進入 OAuth 流程
+//            get("/login-oauth-google") {
+//                // 只要呼叫此路徑，就會自動轉址到 Google 的授權頁
+//                // 若成功，Google 最後會帶著 code 轉址到 /callback
+//            }
+//
+//            // (2) Google OAuth callback
+//            get("/callback") {
+//                val principal = call.authentication.principal<OAuthAccessTokenResponse.OAuth2>()
+//                if (principal != null) {
+//                    // principal.accessToken 就是 Google 回傳的 access_token
+//                    // principal.extraParameters 可能包含 refresh_token、id_token 等 (若 scope 與流程允許)
+//
+//                    val accessToken = principal.accessToken
+//                    val tokenType = principal.tokenType
+//                    val expiresIn = principal.expiresIn
+//                    val refreshToken = principal.refreshToken
+//                    val idToken = principal.extraParameters["id_token"] // Google 可能回傳 ID Token
+//
+//                    // 你可以選擇用 Google API 拿 userinfo
+//                    // (舉例) call Google "https://www.googleapis.com/oauth2/v3/userinfo"
+//                    // 取得使用者資訊，然後決定要不要在本地 DB 建立使用者。
+//                    val userInfo = fetchGoogleUserInfo(accessToken)  // 自行撰寫
+//
+//                    // 在這邊可以：
+//                    // 1. 建立 (或更新) 本地使用者資料
+//                    // 2. 產生 JWT Token（或 session）給使用者
+//                    val localJWT = authService.issueLocalJWTForOAuthUser(
+//                        email = userInfo.email,
+//                        name = userInfo.name
+//                    )
+//
+//                    // 最後回傳 JWT 或重導到前端頁面
+//                    call.respondText("OAuth Success! Here's your local JWT token = $localJWT")
+//                } else {
+//                    call.respond(HttpStatusCode.Unauthorized, "No principal")
+//                }
+//            }
+//        }
     }
 }

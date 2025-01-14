@@ -15,6 +15,7 @@ fun Application.configureFrameworks() {
         single { UserService(get()) }
         single { UserAccountRepository() }
         single { AuthService(get()) }
+        single { HttpClientProvider.createHttpClient() }
     }
 
     install(Koin) {

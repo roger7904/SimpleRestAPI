@@ -36,6 +36,13 @@ dependencies {
     implementation("io.ktor:ktor-server-config-yaml-jvm")
     testImplementation("io.ktor:ktor-server-test-host-jvm")
 
+    // ktor client
+    implementation("io.ktor:ktor-client-core")
+    implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-client-content-negotiation")
+    implementation("io.ktor:ktor-client-serialization")
+    implementation("io.ktor:ktor-client-json")
+
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")

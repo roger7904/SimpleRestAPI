@@ -46,4 +46,17 @@ class AuthService(private val userAccountRepository: UserAccountRepository) {
 
         return token
     }
+
+    fun issueLocalJWTForOAuthUser(email: String?, name: String?): String {
+        // 這裡可以檢查 DB、有無同 email 的使用者，若無就建立
+        // 產生 JWT
+        val secret = "Roger-TEST-secret"
+        val token = JWT.create()
+            .withAudience("ktorAudience")
+            .withIssuer("ktor.io")
+            .withClaim("username", email ?: "unknown")
+            .withClaim("role", "user")
+            .sign(Algorithm.HMAC256(secret))
+        return token
+    }
 }

@@ -12,3 +12,11 @@ data class UserAccount(
     val password: String,
     val role: String
 )
+
+@Serializable
+data class UserInfo(
+    val id: String? = null,
+    val email: String? = null,
+    val name: String? = null,
+    val picture: String? = null
+)
