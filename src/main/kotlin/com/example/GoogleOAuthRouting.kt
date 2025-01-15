@@ -1,11 +1,15 @@
 package com.example
 
+import com.example.models.UserInfo
 import com.example.repository.*
 import com.example.service.AuthService
 import com.example.service.UserSession
 import com.example.service.getUserInfo
 import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.http.headers
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -79,9 +83,9 @@ fun Application.configureGoogleOAuth() {
                         // 儲存到 session
                         call.sessions.set(UserSession(state, oauthToken.accessToken))
 
-                        val userSession: UserSession? = call.sessions.get<UserSession>()
-                        val userInfo = userSession?.let { getUserInfo(httpClient, it.token) }
-                        println("userInfo:$userInfo")
+//                        val userSession: UserSession? = call.sessions.get<UserSession>()
+//                        val userInfo = userSession?.let { getUserInfo(httpClient, it.token) }
+//                        println("userInfo:$userInfo")
 
                         // 轉向原先想去的地方，或預設 /home
                         redirects[state]?.let { redirectUrl ->
@@ -92,6 +96,22 @@ fun Application.configureGoogleOAuth() {
                 }
                 // 如果沒有對應的 redirect 或 state 就跳回 /home
                 call.respondRedirect("/home")
+            }
+        }
+
+        get("/home") {
+            val userSession: UserSession? = getSession(call)
+            if (userSession != null) {
+                val userInfo: UserInfo = getPersonalGreeting(httpClient, userSession)
+                call.respondText("Hello, ${userInfo.name}! Welcome home!")
+            }
+        }
+
+        get("/{path}") {
+            val userSession: UserSession? = getSession(call)
+            if (userSession != null) {
+                val userInfo: UserInfo = getPersonalGreeting(httpClient, userSession)
+                call.respondText("Hello, ${userInfo.name}!")
             }
         }
 
@@ -112,4 +132,29 @@ fun Application.configureGoogleOAuth() {
             }
         }
     }
+}
+
+private suspend fun getPersonalGreeting(
+    httpClient: HttpClient,
+    userSession: UserSession
+): UserInfo = httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo") {
+    headers {
+        append(HttpHeaders.Authorization, "Bearer ${userSession.token}")
+    }
+}.body()
+
+private suspend fun getSession(
+    call: ApplicationCall
+): UserSession? {
+    val userSession: UserSession? = call.sessions.get()
+    //if there is no session, redirect to login
+    if (userSession == null) {
+        val redirectUrl = URLBuilder("http://0.0.0.0:8080/login").run {
+            parameters.append("redirectUrl", call.request.uri)
+            build()
+        }
+        call.respondRedirect(redirectUrl)
+        return null
+    }
+    return userSession
 }
